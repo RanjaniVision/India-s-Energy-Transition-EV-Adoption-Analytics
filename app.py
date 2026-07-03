@@ -1,184 +1,496 @@
 import streamlit as st
 import pandas as pd
-import matplotlib.pyplot as plt
+import plotly.express as px
+import plotly.graph_objects as go
 import os
-import glob
 
+# -------------------------
+# Page Configuration
+# -------------------------
 st.set_page_config(
-    page_title="Charging Stations Dashboard",
+    page_title="India EV Adoption Analytics",
     page_icon="⚡",
-    layout="wide"
+    layout="wide",
+    initial_sidebar_state="expanded"
 )
+# -------------------------
+# Custom Theme
+# -------------------------
 
-# --------------------------------------------------
-# Find Excel File Automatically
-# --------------------------------------------------
+st.markdown("""
+<style>
 
-BASE_DIR = os.path.dirname(__file__)
+.stApp{
+    background-color:#071329;
+}
 
-excel_files = glob.glob(
-    os.path.join(
-        BASE_DIR,
-        "India-s-Energy-Transition-EV-Adoption-Analytics",
-        "*.xlsx"
-    )
-)
+h1,h2,h3{
+    color:white;
+}
 
-if len(excel_files) == 0:
-    st.error("❌ No Excel file found inside 'India-s-Energy-Transition-EV-Adoption-Analytics' folder.")
-    st.stop()
+p{
+    color:#d9d9d9;
+}
 
-FILE_PATH = excel_files[0]
+[data-testid="stMetric"]{
+    background:#0F2744;
+    border-radius:15px;
+    padding:20px;
+    border:1px solid #1D4E89;
+    text-align:center;
+}
 
-# --------------------------------------------------
+.sidebar .sidebar-content{
+    background:#06111F;
+}
+
+</style>
+""",unsafe_allow_html=True)
+# -------------------------
 # Load Dataset
-# --------------------------------------------------
+# -------------------------
 
-charging = pd.read_excel(
-    FILE_PATH,
-    sheet_name="Charging_Stations"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+FILE_PATH = os.path.join(
+    BASE_DIR,
+    "Dataset",
+    "Indian-EV.xlsx"
+)
+@st.cache_data
+def load_data():
+
+    states = pd.read_excel(FILE_PATH, sheet_name="State_Master")
+
+    ev = pd.read_excel(FILE_PATH, sheet_name="EV_Registrations")
+
+    fuel = pd.read_excel(FILE_PATH, sheet_name="Fuel_Prices")
+
+    charging = pd.read_excel(FILE_PATH, sheet_name="Charging_Stations")
+
+    renewable = pd.read_excel(FILE_PATH, sheet_name="Renewable_Energy")
+
+    renewable["Renewable_MW"] = (
+        renewable["Solar_MW"]
+        + renewable["Wind_MW"]
+        + renewable["Hydro_MW"]
+    )
+
+    renewable = renewable[
+        ["State_ID", "Month", "Renewable_MW"]
+    ]
+
+    charging_summary = charging.groupby("State_ID").agg({
+        "Chargers":"sum",
+        "Utilization_%":"mean",
+        "Uptime_%":"mean"
+    }).reset_index()
+
+    df = ev.merge(states,on="State_ID")
+
+    df = df.merge(
+        fuel,
+        on=["State_ID","Month"]
+    )
+
+    df = df.merge(
+        renewable,
+        on=["State_ID","Month"]
+    )
+
+    df = df.merge(
+        charging_summary,
+        on="State_ID"
+    )
+
+    return df,charging,ev,fuel,renewable
+
+df, charging, ev, fuel, renewable = load_data()
+# Title
+# -------------------------
+
+st.title("⚡ India EV Adoption Analytics Dashboard")
+
+st.markdown("""
+### Sustainable Transportation & Energy Transition
+
+This dashboard analyzes:
+
+- EV Adoption
+- Charging Infrastructure
+- Fuel Prices
+- Renewable Energy
+- State-wise Performance
+""")
+# ==========================
+# SIDEBAR FILTERS
+# ==========================
+
+st.sidebar.header("🔍 Dashboard Filters")
+
+states = ["All"] + sorted(df["State"].dropna().unique().tolist())
+
+selected_state = st.sidebar.selectbox(
+    "State",
+    states
 )
 
-# --------------------------------------------------
-# Dashboard Title
-# --------------------------------------------------
+months = ["All"] + sorted(df["Month"].astype(str).unique().tolist())
 
-st.title("⚡ Charging Stations Dashboard")
-
-st.markdown(
-"""
-Analysis of India's EV Charging Infrastructure
-"""
+selected_month = st.sidebar.selectbox(
+    "Month",
+    months
 )
 
-# --------------------------------------------------
-# KPI Cards
-# --------------------------------------------------
+filtered_df = df.copy()
 
-col1, col2, col3, col4 = st.columns(4)
+if selected_state != "All":
+    filtered_df = filtered_df[
+        filtered_df["State"] == selected_state
+    ]
+
+if selected_month != "All":
+    filtered_df = filtered_df[
+        filtered_df["Month"].astype(str) == selected_month
+    ]
+    # ==========================================
+# FILTER CHARGING DATA
+# ==========================================
+
+filtered_charging = charging.copy()
+
+if selected_state != "All":
+
+    state_ids = filtered_df["State_ID"].unique()
+
+    filtered_charging = charging[
+        charging["State_ID"].isin(state_ids)
+    ]
+# ============================================================
+# KPI CARDS
+# ============================================================
+
+st.markdown("## 📊 Dashboard Overview")
+
+col1, col2, col3, col4, col5, col6 = st.columns(6)
+
+# Total EVs
+try:
+    total_ev =filtered_df["Total_EV"].sum()
+except:
+    total_ev = len(ev)
+
+# Charging Stations
+try:
+    total_station = filtered_charging["Station_ID"].nunique()
+except:
+    total_station = len(charging)
+
+# Total Chargers
+try:
+    total_chargers = filtered_charging["Chargers"].sum()
+except:
+    total_chargers = 0
+
+# Utilization
+try:
+    avg_utilization = filtered_charging["Utilization_%"].mean()
+except:
+    avg_utilization = 0
+
+# Uptime
+try:
+    avg_uptime = filtered_charging["Uptime_%"].mean()
+except:
+    avg_uptime = 0
+
+# States
+try:
+    total_states = df["State"].nunique()
+except:
+    total_states = charging["State"].nunique()
 
 col1.metric(
-    "Total Stations",
-    charging["Station_ID"].nunique()
+    "🚗 Total EVs",
+    f"{int(total_ev):,}"
 )
 
 col2.metric(
-    "Total Chargers",
-    int(charging["Chargers"].sum())
+    "⚡ Stations",
+    total_station
 )
 
 col3.metric(
-    "Average Utilization",
-    f"{charging['Utilization_%'].mean():.2f}%"
+    "🔌 Chargers",
+    f"{int(total_chargers):,}"
 )
 
 col4.metric(
-    "Average Uptime",
-    f"{charging['Uptime_%'].mean():.2f}%"
+    "📈 Utilization",
+    f"{avg_utilization:.1f}%"
+)
+
+col5.metric(
+    "🟢 Uptime",
+    f"{avg_uptime:.1f}%"
+)
+
+col6.metric(
+    "🏙 States",
+    total_states
 )
 
 st.divider()
+# ============================================================
+# EV ADOPTION BY STATE
+# ============================================================
 
-# --------------------------------------------------
-# Chart 1
-# --------------------------------------------------
+st.subheader("🚗 EV Adoption by State")
 
-st.subheader("Top 10 Cities by Charging Stations")
+try:
 
-city = charging["City"].value_counts().head(10)
-
-fig, ax = plt.subplots(figsize=(8,5))
-
-city.plot(kind="bar", ax=ax)
-
-ax.set_xlabel("City")
-ax.set_ylabel("Stations")
-ax.set_title("Charging Stations by City")
-
-plt.xticks(rotation=45)
-
-st.pyplot(fig)
-
-# --------------------------------------------------
-# Chart 2
-# --------------------------------------------------
-
-st.subheader("Average Utilization by Charger Type")
-
-util = charging.groupby("Type")["Utilization_%"].mean()
-
-fig, ax = plt.subplots(figsize=(7,4))
-
-util.plot(kind="bar", ax=ax)
-
-ax.set_xlabel("Type")
-ax.set_ylabel("Average Utilization (%)")
-ax.set_title("Utilization by Charger Type")
-
-st.pyplot(fig)
-
-# --------------------------------------------------
-# Chart 3
-# --------------------------------------------------
-
-st.subheader("Distribution of Chargers")
-
-fig, ax = plt.subplots(figsize=(7,4))
-
-charging["Chargers"].plot(
-    kind="hist",
-    bins=10,
-    ax=ax
+    ev_state = (
+    filtered_df.groupby("State")["Total_EV"]
+    .sum()
+    .sort_values(ascending=False)
+    .head(10)
 )
 
-ax.set_xlabel("Chargers")
-ax.set_ylabel("Frequency")
-ax.set_title("Distribution of Chargers")
+    fig = px.bar(
+        x=ev_state.values,
+        y=ev_state.index,
+        orientation="h",
+        color=ev_state.values,
+        color_continuous_scale="Viridis",
+        labels={
+            "x":"Total EVs",
+            "y":"State"
+        },
+        title="Top 10 States by EV Adoption"
+    )
 
-st.pyplot(fig)
+    fig.update_layout(
+        plot_bgcolor="#071329",
+        paper_bgcolor="#071329",
+        font_color="white"
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
+
+except:
+
+    st.warning("EV_Adoption sheet or EV_Count column not available.")
+# ============================================================
+# CHARGING STATIONS
+# ============================================================
+
+st.subheader("⚡ Top Cities by Charging Stations")
+
+city = filtered_charging["City"].value_counts().head(10)
+
+fig = px.bar(
+    x=city.index,
+    y=city.values,
+    color=city.values,
+    color_continuous_scale="Electric",
+    labels={
+        "x":"City",
+        "y":"Stations"
+    }
+)
+
+fig.update_layout(
+    plot_bgcolor="#071329",
+    paper_bgcolor="#071329",
+    font_color="white"
+)
+
+st.plotly_chart(fig, use_container_width=True)
+# ==========================================================
+# CHARTS SECTION
+# ==========================================================
+
+col1, col2 = st.columns(2)
+
+# -------------------------
+# Charger Type Distribution
+# -------------------------
+
+with col1:
+
+    st.subheader("🔌 Charger Type Distribution")
+
+    type_chart = filtered_charging["Type"].value_counts()
+
+    fig = px.pie(
+        values=type_chart.values,
+        names=type_chart.index,
+        hole=0.6,
+        color_discrete_sequence=px.colors.qualitative.Set2
+    )
+
+    fig.update_layout(
+        paper_bgcolor="#071329",
+        font_color="white"
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
+
+## -------------------------
+# Charger Distribution
+# -------------------------
+
+with col2:
+
+    st.subheader("⚡ Chargers Distribution")
+
+    fig = px.histogram(
+        filtered_charging,
+        x="Chargers",
+        nbins=20,
+        color_discrete_sequence=["#00E676"]
+    )
+
+    fig.update_layout(
+        paper_bgcolor="#071329",
+        plot_bgcolor="#071329",
+        font_color="white"
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
+
+# ==========================================================
+# Scatter Plot
+# ==========================================================
+
+st.subheader("📈 Utilization vs Uptime")
+
+fig = px.scatter(
+
+    filtered_charging,
+
+    x="Utilization_%",
+
+    y="Uptime_%",
+
+    color="Type",
+
+    size="Chargers",
+
+    hover_name="City"
+
+)
+
+fig.update_layout(
+    paper_bgcolor="#071329",
+    plot_bgcolor="#071329",
+    font_color="white"
+)
+
+st.plotly_chart(fig, use_container_width=True)
+# ==========================================================
+# DATA TABLE
+# ==========================================================
 
 st.divider()
 
-# --------------------------------------------------
-# Raw Data
-# --------------------------------------------------
+st.subheader("📋 Charging Station Dataset")
 
-st.subheader("Charging Stations Data")
+st.dataframe(
+    filtered_charging,
+    use_container_width=True,
+    height=400
+)
 
-st.dataframe(charging, use_container_width=True)
+# ==========================================================
+# DOWNLOAD BUTTON
+# ==========================================================
+
+csv = filtered_charging.to_csv(index=False)
+
+st.download_button(
+
+    "⬇ Download Filtered Dataset",
+
+    csv,
+
+    "Charging_Stations.csv",
+
+    "text/csv"
+
+)
+
+# ==========================================================
+# AI INSIGHTS
+# ==========================================================
 
 st.divider()
 
-# --------------------------------------------------
-# Insights
-# --------------------------------------------------
+st.subheader("🤖 AI Insights")
 
-st.subheader("📈 Insights")
+highest_city = filtered_charging["City"].value_counts().idxmax()
+highest_station = filtered_charging["City"].value_counts().max()
+avg_util = charging["Utilization_%"].mean()
 
-st.info(f"""
-• Total charging stations available: **{charging['Station_ID'].nunique()}**
+avg_up = charging["Uptime_%"].mean()
 
-• Average charger utilization is **{charging['Utilization_%'].mean():.2f}%**
+st.success(f"""
 
-• Average uptime is **{charging['Uptime_%'].mean():.2f}%**
+### Key Insights
 
-• Cities with more charging stations indicate stronger EV infrastructure.
+🚗 **Highest Charging Infrastructure:** {highest_city}
+
+⚡ **Charging Stations:** {highest_station}
+
+📈 **Average Utilization:** {avg_util:.2f} %
+
+🟢 **Average Uptime:** {avg_up:.2f} %
+
+🔋 Higher charging infrastructure indicates stronger EV ecosystem.
+
+📍 States with low charging availability should receive priority investment.
+
 """)
 
-# --------------------------------------------------
-# Recommendations
-# --------------------------------------------------
+# ==========================================================
+# RECOMMENDATIONS
+# ==========================================================
 
 st.subheader("💡 Recommendations")
 
-st.success("""
-✔ Increase charging stations in cities with fewer installations.
+st.info("""
 
-✔ Improve charger utilization through better planning.
+✅ Increase charging stations in low-coverage regions.
 
-✔ Maintain uptime above 95%.
+✅ Expand DC Fast Charging corridors.
 
-✔ Expand fast charging infrastructure.
+✅ Improve charger uptime above 95%.
 
-✔ Monitor charger usage regularly for efficient maintenance.
+✅ Use predictive maintenance for charging stations.
+
+✅ Integrate renewable energy with charging infrastructure.
+
+✅ Encourage EV adoption through government incentives.
+
 """)
+
+# ==========================================================
+# FOOTER
+# ==========================================================
+
+st.divider()
+
+st.markdown(
+"""
+<center>
+
+### ⚡ India EV Adoption Analytics Dashboard
+
+Developed by **Ranjani G**
+
+Python | Streamlit | Plotly 
+
+</center>
+""",
+unsafe_allow_html=True
+)
