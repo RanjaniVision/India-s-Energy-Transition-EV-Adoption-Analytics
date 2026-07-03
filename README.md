@@ -1,6 +1,6 @@
 # ⚡ India EV Adoption Analytics Dashboard
 
-## 📌 Project Overview
+## Project Overview
 
 The **India EV Adoption Analytics Dashboard** is an interactive Business Intelligence dashboard developed using **Python, Streamlit, Plotly, and Pandas**. The project analyzes India's Electric Vehicle (EV) ecosystem by combining EV adoption, charging infrastructure, renewable energy, and fuel-related datasets.
 
@@ -8,7 +8,7 @@ The dashboard helps stakeholders understand current EV adoption trends, identify
 
 ---
 
-# 🎯 Problem Statement
+# Problem Statement
 
 India is accelerating the adoption of Electric Vehicles (EVs) to reduce dependence on fossil fuels, lower carbon emissions, and achieve sustainability goals.
 
@@ -25,7 +25,7 @@ This dashboard provides a centralized view of India's EV ecosystem using interac
 
 ---
 
-# 🎯 Objectives
+# Objectives
 
 - Analyze EV adoption across Indian states.
 - Monitor charging infrastructure.
@@ -36,16 +36,16 @@ This dashboard provides a centralized view of India's EV ecosystem using interac
 
 ---
 
-# 📊 Dashboard Features
+# Dashboard Features
 
-### ✅ Interactive Filters
+###  Interactive Filters
 
 - State Filter
 - Month Filter
 
 ---
 
-### 📈 KPI Cards
+### KPI Cards
 
 - Total EVs
 - Total Charging Stations
@@ -56,7 +56,7 @@ This dashboard provides a centralized view of India's EV ecosystem using interac
 
 ---
 
-### 📊 Visualizations
+### Visualizations
 
 - EV Adoption by State
 - Top Cities by Charging Stations
@@ -67,7 +67,7 @@ This dashboard provides a centralized view of India's EV ecosystem using interac
 
 ---
 
-# 🛠️ Technologies Used
+# Technologies Used
 
 | Technology | Purpose |
 |------------|----------|
@@ -81,7 +81,7 @@ This dashboard provides a centralized view of India's EV ecosystem using interac
 
 ---
 
-# 📂 Dataset
+# Dataset
 
 The project uses multiple datasets related to:
 
@@ -94,7 +94,7 @@ These datasets were cleaned, merged, and analyzed using Python.
 
 ---
 
-# 📈 Key Insights
+# Key Insights
 
 - EV adoption is growing rapidly in selected states.
 - Charging infrastructure is concentrated in major cities.
@@ -105,7 +105,7 @@ These datasets were cleaned, merged, and analyzed using Python.
 
 ---
 
-# 💡 Recommendations
+# Recommendations
 
 - Increase charging stations in high EV adoption regions.
 - Expand infrastructure in Tier-2 and Tier-3 cities.
@@ -115,7 +115,7 @@ These datasets were cleaned, merged, and analyzed using Python.
 
 ---
 
-# 📷 Dashboard Preview
+# Dashboard Preview
 
 ## Dashboard Overview
 
@@ -174,7 +174,7 @@ streamlit run dashboard.py
 
 ---
 
-# 📁 Project Structure
+# Project Structure
 
 ```
 India-EV-Adoption-Analytics/
@@ -199,7 +199,7 @@ India-EV-Adoption-Analytics/
 
 ---
 
-# 📌 Future Enhancements
+# Future Enhancements
 
 - Predict future EV adoption using Machine Learning.
 - Add forecasting dashboards.
@@ -209,7 +209,7 @@ India-EV-Adoption-Analytics/
 
 ---
 
-# 👩‍💻 Author
+# Author
 
 **Ranjani G**
 
@@ -227,5 +227,3 @@ India-EV-Adoption-Analytics/
 - AWS
 
 ---
-
-# ⭐ If you found this project useful, please give it a Star!
