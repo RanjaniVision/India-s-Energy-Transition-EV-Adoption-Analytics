@@ -119,34 +119,39 @@ These datasets were cleaned, merged, and analyzed using Python.
 
 ## Dashboard Overview
 
-(Add Screenshot Here)
+<img width="1920" height="1020" alt="image" src="https://github.com/user-attachments/assets/7c3d63e9-fc5f-4cb3-82fd-ba51dd1dacf2" />
 
----
+
+
 
 ## EV Adoption Analysis
 
-(Add Screenshot Here)
+<img width="1920" height="1020" alt="image" src="https://github.com/user-attachments/assets/5989627f-c8d2-4d84-92da-dbc4c6799c18" />
 
----
+
+
 
 ## Charging Infrastructure
 
-(Add Screenshot Here)
+<img width="1920" height="1020" alt="image" src="https://github.com/user-attachments/assets/36052ac8-d4af-47fb-ac8e-5df70c78b93b" />
 
----
+<img width="1920" height="1020" alt="image" src="https://github.com/user-attachments/assets/48dec6a9-c192-4691-a7c0-53645e7324c2" />
+
+
+
 
 ## Utilization Analysis
 
-(Add Screenshot Here)
+<img width="1920" height="1020" alt="image" src="https://github.com/user-attachments/assets/8985595d-881d-4f74-8a2c-7ced497869d9" />
 
----
+
 
 # 🚀 Installation
 
 Clone the repository:
 
 ```bash
-git clone https://github.com/yourusername/India-EV-Adoption-Analytics.git
+git clone https://github.com/RanjaniVision/India-EV-Adoption-Analytics.git
 ```
 
 Move into the project folder:
@@ -208,14 +213,11 @@ India-EV-Adoption-Analytics/
 
 **Ranjani G**
 
-Aspiring AI/ML Engineer | Data Analyst | Python Developer
+| Data Analyst |
 
 ### Skills
 
 - Python
-- SQL
-- Machine Learning
-- Deep Learning
 - Streamlit
 - Pandas
 - NumPy
