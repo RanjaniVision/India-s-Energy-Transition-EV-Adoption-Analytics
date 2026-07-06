@@ -61,7 +61,7 @@ This dashboard provides a centralized view of India's EV ecosystem using interac
 - EV Adoption by State
 - Top Cities by Charging Stations
 - Charger Type Distribution
-- Chargers Distribution Histogram
+- Chargers Distribution Donut chart
 - Utilization vs Uptime Scatter Plot
 - Charging Station Data Table
 
