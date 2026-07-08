@@ -112,16 +112,22 @@ df, charging, ev, fuel, renewable = load_data()
 st.title("⚡ India EV Adoption Analytics Dashboard")
 
 st.markdown("""
-### Sustainable Transportation & Energy Transition
+<h3 style="color:#FFFFFF; font-weight:bold;">
+Sustainable Transportation & Energy Transition
+</h3>
 
+<p style="color:#FFFFFF; font-size:18px;">
 This dashboard analyzes:
+</p>
 
-- EV Adoption
-- Charging Infrastructure
-- Fuel Prices
-- Renewable Energy
-- State-wise Performance
-""")
+<ul style="color:#FFFFFF; font-size:17px;">
+    <li>EV Adoption</li>
+    <li>Charging Infrastructure</li>
+    <li>Fuel Prices</li>
+    <li>Renewable Energy</li>
+    <li>State-wise Performance</li>
+</ul>
+""", unsafe_allow_html=True)
 # ==========================
 # SIDEBAR FILTERS
 # ==========================
@@ -252,7 +258,7 @@ try:
     ev_state = (
     filtered_df.groupby("State")["Total_EV"]
     .sum()
-    .sort_values(ascending=False)
+    .sort_values(ascending=True)
     .head(10)
 )
 
